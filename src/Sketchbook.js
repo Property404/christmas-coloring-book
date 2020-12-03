@@ -59,13 +59,22 @@ export class Sketchbook
 
 	loadOutline()
 	{
-		console.log("Loading...");
 		const image = new Image();
 		image.src = SANTA_SRC;
-		console.log(SANTA_SRC);
 		return new Promise(res=>{
 			image.onload = ()=>{
-				this.#context.drawImage(image, 0,0, this.#canvas.width, this.#canvas.height);
+				const width = this.#canvas.width;
+				const height = this.#canvas.height;
+				this.#context.drawImage(image, 0,0, width, height);
+				const pixels = this.#context.getImageData(0,0, width, height);
+				for(let i=0;i<pixels.data.length;i+=1)
+				{
+					if(pixels.data[i]<128)
+						pixels.data[i] = 0;
+					if(pixels.data[i]>=128)
+						pixels.data[i] = 255;
+				}
+				this.#context.putImageData(pixels, 0, 0);
 				console.log("LOADED");
 				res(true);
 			}
