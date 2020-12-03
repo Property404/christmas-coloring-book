@@ -1,9 +1,28 @@
-import SANTA_SRC from "./santa.png";
+const rc = require.context("./images", true, /^\.\/.*\.png$/)
+const imageList = rc.keys().map(rc).map(x=>x.default)
+
 class Page
 {
 	#history=[];
-	constructor()
+	#imagePromise;
+	constructor(imageSource)
 	{
+		const image = new Image();
+		this.#imagePromise = new Promise((res, rej)=>{
+			image.onload = ()=>{
+				res(image);
+			}
+			image.onerror = (e)=>{
+				rej("Image load failed");
+			}
+		});
+		image.src = imageSource;
+	}
+
+
+	getImage()
+	{
+		return this.#imagePromise;
 	}
 
 	pushHistory(mainCanvas)
@@ -21,30 +40,56 @@ class Page
 	{
 		if(this.#history.length == 0)
 		{
-			console.log("wall");
-			return;
+			return false;
 		}
 		const backup = this.#history.pop();
 		const mainContext = mainCanvas.getContext("2d");
 		mainContext.clearRect(0,0, mainCanvas.width, mainCanvas.height);
 		mainContext.drawImage(backup, 0, 0);
+		return true;
 	}
 }
 export class Sketchbook
 {
 	#canvas;
 	#context;
-	#page;
+	#pages = [];
+	#page_number = 0;
 	constructor()
 	{
 		this.#canvas = document.querySelector("canvas");
 		this.#context = this.#canvas.getContext("2d");
-		this.#page = new Page();
+		imageList.forEach(url=>this.#pages.push(new Page(url)));
 		this.loadOutline();
 	}
 
 	get canvas(){
 		return this.#canvas;
+	}
+
+	get #page(){
+		return this.#pages[this.#page_number];
+	}
+
+	nextPage(){
+		this.pushHistory();
+		if(this.#page_number < this.#pages.length-1)
+			this.#page_number++;
+		else
+			this.#page_number = 0;
+		this.clear();
+		if(!this.popHistory())
+			this.loadOutline();
+	}
+	prevPage(){
+		this.pushHistory();
+		if(this.#page_number > 0)
+			this.#page_number--;
+		else
+			this.#page_number = this.#pages.length - 1;
+		this.clear();
+		if(!this.popHistory())
+			this.loadOutline();
 	}
 
 	pushHistory()
@@ -54,19 +99,30 @@ export class Sketchbook
 
 	popHistory()
 	{
-		this.#page.popHistory(this.#canvas);
+		return this.#page.popHistory(this.#canvas);
 	}
 
+	clear()
+	{
+		const width = this.#canvas.width;
+		const height = this.#canvas.height;
+		this.#context.clearRect(0,0, width, height);
+	}
+
+	// Draw outline of base B&W image
 	loadOutline()
 	{
-		const image = new Image();
-		image.src = SANTA_SRC;
-		return new Promise(res=>{
-			image.onload = ()=>{
-				const width = this.#canvas.width;
-				const height = this.#canvas.height;
-				this.#context.drawImage(image, 0,0, width, height);
-				const pixels = this.#context.getImageData(0,0, width, height);
+		this.#page.getImage().then(image=>
+			{
+				const canvasWidth = this.#canvas.width;
+				const canvasHeight = this.#canvas.height;
+
+				// Draw image, but take aspect ratio into account
+				const height = image.height * canvasWidth/image.width;
+				this.#context.drawImage(image, 0, canvasHeight/2-height/2, canvasWidth, height);
+
+				// Normalize color values
+				const pixels = this.#context.getImageData(0,0, canvasWidth, canvasHeight);
 				for(let i=0;i<pixels.data.length;i+=1)
 				{
 					if(pixels.data[i]<128)
@@ -75,9 +131,7 @@ export class Sketchbook
 						pixels.data[i] = 255;
 				}
 				this.#context.putImageData(pixels, 0, 0);
-				console.log("LOADED");
-				res(true);
 			}
-		});
+		);
 	}
 }

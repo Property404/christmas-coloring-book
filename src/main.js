@@ -12,7 +12,14 @@ document.querySelector("#undo-button").addEventListener("click", ()=>{
 })
 
 document.querySelector("#color-button").addEventListener("change", e=>{
-	console.log(e.currentTarget.value);
 	mode.setColor(e.currentTarget.value);
 })
+
+document.querySelector("#next-button").addEventListener("click", e=>{
+	sketchbook.nextPage();
+})
+document.querySelector("#prev-button").addEventListener("click", e=>{
+	sketchbook.prevPage();
+})
+
 

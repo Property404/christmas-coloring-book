@@ -39,6 +39,5 @@ export function absoluteToCanvas(canvas, absolute_x, absolute_y)
 	const bbox = canvas.getBoundingClientRect();
 	const width_ratio = 1*canvas.width/(bbox.right-bbox.left)
 	const height_ratio = 1*canvas.height/(bbox.bottom-bbox.top)
-	console.log(width_ratio);
 	return [(absolute_x-bbox.left) * width_ratio, (absolute_y-bbox.top)*height_ratio];
 }
