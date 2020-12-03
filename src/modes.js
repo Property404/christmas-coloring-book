@@ -9,18 +9,34 @@ class Color
 {
 	constructor(r,g,b,a=255)
 	{
-		const list = [r,g,b,a];
-		for(let i=0;i<4;i++)
+		if(typeof r == "string" && g == null && b == null)
 		{
-			if(
-				list[i] === null ||
-				list[i] === undefined ||
-				list[i] > 255 || 
-				list[i] < 0
-			)
-				throw new Error("Invalid constructor arguments for Color");
-		}
+			if(r[0]!=="#")
+				throw("String input to Color constructor should be #hex value");
 
+			const hexToRgb = hex =>
+				hex.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i
+					,(m, r, g, b) => '#' + r + r + g + g + b + b)
+					.substring(1).match(/.{2}/g)
+					.map(x => parseInt(x, 16))
+
+			const arr = hexToRgb(r);
+			[r, g,b] = arr;
+		}
+		else
+		{
+			const list = [r,g,b,a];
+			for(let i=0;i<4;i++)
+			{
+				if(
+					list[i] === null ||
+					list[i] === undefined ||
+					list[i] > 255 || 
+					list[i] < 0
+				)
+					throw new Error("Invalid constructor arguments for Color");
+			}
+		}
 		this.red = r;
 		this.green = g;
 		this.blue = b;
@@ -60,6 +76,11 @@ class Mode
 		}
 	}
 
+	setColor(color_description)
+	{
+		this.color =  new Color(color_description);
+	}
+
 	deactivate()
 	{
 		this.canvas.onmouseup = null;
@@ -69,9 +90,7 @@ class Mode
 		this.context = null;
 	}
 
-	activate()
-	{
-	}
+	activate() { }
 }
 
 // Erase with a block
@@ -85,10 +104,10 @@ export class FillMode extends Mode
 	activate()
 	{
 		Mode.prototype.activate.call(this);
-		this.canvas.onclick = this._fill.bind(this);
+		this.canvas.onclick = this.#fill.bind(this);
 	}
 
-	_getColorAt(color_layer, x,y)
+	#getColorAt(color_layer, x,y)
 	{
 		const index = (y*this.canvas.width + x)*4;
 		if(!Number.isInteger(index))
@@ -104,14 +123,14 @@ export class FillMode extends Mode
 		);
 	}
 
-	_fill(e)
+	#fill(e)
 	{
 		let [start_x, start_y] = absoluteToCanvas(this.canvas, e.clientX,e.clientY);
 		start_x = Math.round(start_x);
 		start_y = Math.round(start_y);
 
 		const color_layer = this.context.getImageData(0,0,this.canvas.width,this.canvas.height);
-		const old_color = this._getColorAt(color_layer, start_x,start_y)
+		const old_color = this.#getColorAt(color_layer, start_x,start_y)
 
 		// Sanity check
 		if(old_color.equals(this.color))
