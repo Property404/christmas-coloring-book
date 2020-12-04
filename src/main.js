@@ -7,6 +7,9 @@ const mode = new FillMode(sketchbook);
 
 mode.activate();
 
+// Set initial color
+mode.setColor(document.getElementById("color-button").value);
+
 document.querySelector("#undo-button").addEventListener("click", ()=>{
 	sketchbook.popHistory();
 })
