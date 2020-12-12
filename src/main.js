@@ -7,15 +7,24 @@ const mode = new FillMode(sketchbook);
 
 mode.activate();
 
+function updateColor()
+{
+	const colorValue = document.getElementById("color-button").value;
+	mode.setColor(colorValue);
+
+	const colorButton = document.getElementById("color-button-label");
+	colorButton.style=`text-shadow: 0 0 ${colorValue};`;
+}
+
 // Set initial color
-mode.setColor(document.getElementById("color-button").value);
+updateColor();
 
 document.querySelector("#undo-button").addEventListener("click", ()=>{
 	sketchbook.popHistory();
 });
 
 document.querySelector("#color-button").addEventListener("change", e=>{
-	mode.setColor(e.currentTarget.value);
+	updateColor();
 });
 
 document.querySelector("#next-button").addEventListener("click", e=>{
