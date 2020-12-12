@@ -117,18 +117,29 @@ export class Sketchbook
 				const canvasWidth = this.#canvas.width;
 				const canvasHeight = this.#canvas.height;
 
+				// Keep track of original
+				const originalPixels = this.#context.getImageData(0,0, canvasWidth, canvasHeight);
+
 				// Draw image, but take aspect ratio into account
 				const height = image.height * canvasWidth/image.width;
 				this.#context.drawImage(image, 0, canvasHeight/2-height/2, canvasWidth, height);
 
 				// Normalize color values
 				const pixels = this.#context.getImageData(0,0, canvasWidth, canvasHeight);
-				for(let i=0;i<pixels.data.length;i+=1)
+				for(let i=0;i<pixels.data.length;i+=4)
 				{
-					if(pixels.data[i]<128)
-						pixels.data[i] = 0;
-					if(pixels.data[i]>=128)
-						pixels.data[i] = 255;
+					for(let j=0;j<4;j++)
+					{
+						if(pixels.data[i+j]<128)
+							pixels.data[i+j] = 0;
+						if(pixels.data[i+j]>=128)
+							pixels.data[i+j] = 255;
+					}
+					if(pixels.data[i] || pixels.data[i+1] || pixels.data[i+2])
+					{
+						for(let j=0;j<4;j++)
+							pixels.data[i+j] = originalPixels.data[i+j];
+					}
 				}
 				this.#context.putImageData(pixels, 0, 0);
 			}

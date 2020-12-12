@@ -12,17 +12,28 @@ mode.setColor(document.getElementById("color-button").value);
 
 document.querySelector("#undo-button").addEventListener("click", ()=>{
 	sketchbook.popHistory();
-})
+});
 
 document.querySelector("#color-button").addEventListener("change", e=>{
 	mode.setColor(e.currentTarget.value);
-})
+});
 
 document.querySelector("#next-button").addEventListener("click", e=>{
 	sketchbook.nextPage();
-})
+});
 document.querySelector("#prev-button").addEventListener("click", e=>{
 	sketchbook.prevPage();
-})
+});
+document.querySelector("#outline-button").addEventListener("click", e=>{
+	sketchbook.pushHistory();
+	sketchbook.loadOutline();
+});
+
+document.querySelector("#reset-button").addEventListener("click", e=>{
+	sketchbook.pushHistory();
+	sketchbook.clear();
+	sketchbook.loadOutline();
+});
+
 
 
