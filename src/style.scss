@@ -50,6 +50,18 @@ canvas{
 	max-width:94%;
 }
 
+#tooltip{
+	position:fixed;
+	top:20rem;
+	left:5rem;
+	max-width:15rem;
+	border: 3px solid grey;
+	padding:.5rem;
+	background-color:#eee;
+	opacity:90%;
+	transition:opacity .25s;
+}
+
 @media(orientation: landscape)
 {
 	#app{

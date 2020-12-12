@@ -1,4 +1,5 @@
 import("./style.scss");
+import "./tooltips.js"
 import {Sketchbook} from "./Sketchbook.js"
 import {FillMode} from "./modes.js"
 
